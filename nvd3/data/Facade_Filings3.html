@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="../build/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+    <script src="../build/nv.d3.js"></script>
+
+    <style>
+        text {
+            font: 14px sans-serif;
+        }
+        svg {
+            display: block;
+        }
+        html, body, #chart1, svg {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chart1">
+    <svg></svg>
+</div>
+
+<script>
+
+    historicalBarChart = [
+     {
+    key: "Safe (OK)",
+    color: "#1F78B4",
+    values:
+    [      
+     { x : "Cycle 4", y : 2321 },
+      { x : "Cycle 5", y : 5513 },
+      { x : "Cycle 6", y : 6638 },
+      { x : "Cycle 7", y : 6398 },
+      { x : "Cycle 8", y : 1043 }
+    ]
+  },
+
+ {
+    key: "Safe w/repair (SW)",
+    color: "#5CA2D1",
+    values:
+    [      
+     { x : "Cycle 4", y : 401 },
+      { x : "Cycle 5", y : 6119 },
+      { x : "Cycle 6", y : 5346 },
+      { x : "Cycle 7", y : 5013 },
+      { x : "Cycle 8", y : 527 }
+    ]
+  },
+
+
+        {key: "No Report Filed (NR)",
+    color: "#666666",
+    values:
+    [      
+      { x : "Cycle 4", y : 58 },
+      { x : "Cycle 5", y : 32 },
+      { x : "Cycle 6", y : 123 },
+      { x : "Cycle 7", y : 624 },
+      { x : "Cycle 8", y : 12093 }
+    ]
+  },
+ 
+  {
+    key: "Ongoing Maint. (OM)",
+    color: "#229A00",
+    values:
+    [      
+     { x : "Cycle 4", y : 2553 },
+      { x : "Cycle 5", y : 0 },
+      { x : "Cycle 6", y : 0 },
+      { x : "Cycle 7", y : 0 },
+      { x : "Cycle 8", y : 0 }
+    ]
+  },
+   {
+    key: "Precautionary (PR)",
+    color: "#FF9900",
+    values:
+    [      
+     { x : "Cycle 4", y : 4402 },
+      { x : "Cycle 5", y : 0 },
+      { x : "Cycle 6", y : 0 },
+      { x : "Cycle 7", y : 0 },
+      { x : "Cycle 8", y : 0 }
+    ]
+  },
+  
+   {
+    key: "Unsafe (UN)",
+    color: "#D6301D",
+    values:
+    [      
+     { x : "Cycle 4", y : 29 },
+      { x : "Cycle 5", y : 75 },
+      { x : "Cycle 6", y : 289 },
+      { x : "Cycle 7", y : 1014 },
+      { x : "Cycle 8", y : 459 }
+    ]
+  }
+
+
+
+    ];
+
+    nv.addGraph(function() {
+        var chart = nv.models.multiBarChart()
+        .showControls(false)
+        .stacked(true);
+
+        chart.yAxis
+            .tickFormat(d3.format('.2s'))
+            .axisLabelDistance(0);
+
+        chart.xAxis
+            .staggerLabels(true)
+            .axisLabel('');
+
+        chart
+            .reduceXTicks(false)
+
+          
+
+        d3.select('#chart1 svg')
+            .datum(historicalBarChart)
+            .call(chart);
+
+        nv.utils.windowResize(chart.update);
+        return chart;
+    });
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="../build/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+    <script src="../build/nv.d3.js"></script>
+    <script src="lib/stream_layers.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+    <style>
+        text {
+            font: 13px;
+            font-family: 'Lato', sans-serif;
+        }
+        svg {
+            display: block;
+        }
+        html, body, #chart1, svg {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chart1" class='with-3d-shadow with-transitions'>
+    <svg></svg>
+</div>
+
+<script>
+
+       var long_short_data = [
+        {
+            key: 'Boilers Inspections Avg Wait Time (days)',
+			color: "#1f77b4",
+            values: [
+      
+      { 
+        "label" : "Jun-15" , 
+        "color" : "#1f77b4",
+        "value" : 15.5
+      } , 
+      { 
+        "label" : "Jul-15" , 
+        "color" : "#1f77b4",
+        "value" : 15.6
+      } , 
+      { 
+        "label" : "Aug-15" ,
+        "color" : "#1f77b4",
+        "value" : 17.4
+      } , 
+      { 
+        "label" : "Sep-15" , 
+        "color" : "#1f77b4",
+        "value" : 17.8
+      } , 
+      { 
+        "label" : "Oct-15" , 
+        "color" : "#1f77b4",
+        "value" : 28.8
+      } , 
+      { 
+        "label" : "Nov-15" , 
+        "color" : "#1f77b4",
+        "value" : 34.8
+      },
+      { 
+        "label" : "Dec-15" , 
+        "color" : "#1f77b4",
+        "value" : 23.6
+      },
+      { 
+        "label" : "Jan-16" , 
+        "color" : "#1f77b4",
+        "value" : 9.5
+      },
+      { 
+        "label" : "Feb-16" ,
+        "color" : "#1f77b4",
+        "value" : 13.9
+      },
+      { 
+        "label" : "Mar-16" , 
+        "color" : "#1f77b4",
+        "value" : 8.6
+      },
+      { 
+        "label" : "Apr-16" , 
+        "color" : "#1f77b4",
+        "value" : 7.5
+      },
+      { 
+        "label" : "May-16" , 
+        "color" : "#1f77b4",
+        "value" : 8.4
+      },
+	  { 
+        "label" : "Jun-16" , 
+        "color" : "#1f77b4",
+        "value" : 7.7
+      }	 
+    ]
+  },
+        {
+            key: 'Elevators Inspections Avg Wait Time (days)',
+			color: "#D96459",
+			disabled: true,
+            values: [
+      
+      { 
+        "label" : "Jun-15" , 
+        "color" : "#D96459",
+        "value" : 17.6
+      } , 
+      { 
+        "label" : "Jul-15" , 
+        "color" : "#D96459",
+        "value" : 17.7
+      } , 
+      { 
+        "label" : "Aug-15" ,
+        "color" : "#D96459",
+        "value" : 15.9
+      } , 
+      { 
+        "label" : "Sep-15" , 
+        "color" : "#D96459",
+        "value" : 15.8
+      } , 
+      { 
+        "label" : "Oct-15" , 
+        "color" : "#D96459",
+        "value" : 15.0
+      } , 
+      { 
+        "label" : "Nov-15" , 
+        "color" : "#D96459",
+        "value" : 23.3
+      },
+      { 
+        "label" : "Dec-15" , 
+        "color" : "#D96459",
+        "value" : 11.8
+      },
+      { 
+        "label" : "Jan-16" , 
+        "color" : "#D96459",
+        "value" : 8.4
+      },
+      { 
+        "label" : "Feb-16" ,
+        "color" : "#D96459",
+        "value" : 10.0
+      },
+      { 
+        "label" : "Mar-16" , 
+        "color" : "#D96459",
+        "value" : 11.4
+      },
+      { 
+        "label" : "Apr-16" , 
+        "color" : "#D96459",
+        "value" : 10.5
+      },
+      { 
+        "label" : "May-16" , 
+        "color" : "#D96459",
+        "value" : 9.7
+      },
+	  { 
+        "label" : "Jun-16" , 
+        "color" : "#D96459",
+        "value" : 8.3
+      }	 
+    ]
+  }
+    ];
+
+
+    var chart;
+    nv.addGraph(function() {
+        chart = nv.models.multiBarChart()
+            .x(function(d) { return d.label })
+            .y(function(d) { return d.value })
+            //.yErr(function(d) { return [-Math.abs(d.value * Math.random() * 0.3), Math.abs(d.value * Math.random() * 0.3)] })
+            //.barColor(d3.scale.category20().range())
+            .duration(250)
+            //.forceY([.5, 1])
+			.showControls(false) //Allow user to switch between "Grouped" and "Stacked" mode.
+			//.showValues(true)
+            //.margin({left: 100}) 
+            //.margin({right: 100}) 
+            .stacked(false);
+
+        chart.yAxis.tickFormat(d3.format('.2s'));
+
+        chart.yAxis
+			.axisLabelDistance(-10)
+			.axisLabel('Avg. Wait Time (days)');
+			
+			
+        chart.xAxis
+			//.ticks(20)
+			.axisLabel('')
+			.axisLabelDistance(20);
+
+		chart.legend.vers('furious');
+
+        d3.select('#chart1 svg')
+            .datum(long_short_data)
+            .call(chart);
+
+        nv.utils.windowResize(chart.update);
+		
+		d3.select('#chart1 svg')
+			.append("text")
+			.attr("x", 200)             
+			.attr("y", 50)
+			.attr("text-anchor", "middle")  
+			.text("Development Wait Time for Inspection");
+		
+
+        chart.dispatch.on('stateChange', function(e) { nv.log('New State:', JSON.stringify(e)); });
+        chart.state.dispatch.on('change', function(state){
+            nv.log('state', JSON.stringify(state));
+        });
+        return chart;
+    });
+
+</script>
+</body>
+</html>

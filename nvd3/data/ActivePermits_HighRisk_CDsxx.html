@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html meta-charset="utf-8">
+<head>
+    <meta charset="utf-8">
+    <link href="../build/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+    <script src="../build/nv.d3.js"></script>
+
+    <style>
+        text {
+            font: 14px sans-serif;
+        }
+        svg {
+            display: block;
+        }
+        html, body, svg {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            width: 100%;
+			
+        }
+		#chart {
+			width: 100%;
+			height: 500px;
+		}
+    </style>
+</head>
+<body>
+
+<div id="chart">
+    <svg></svg>
+</div>
+
+<script>
+d3.csv("https://raw.githubusercontent.com/NYCDOB/D3_ActivePermits_Risk/gh-pages/data/SiteSafetyAutomationOutput.csv",function(d){
+	return {
+		cd : +d["Community Board"],
+		score : +d.Score
+	};
+}, function (data){
+
+	var filteredData = data.filter(function(d){
+		return +d.score > 6;
+	})
+	console.log(filteredData.length);
+	
+	var highrisk = d3.nest()
+		.key(function(d) { return d.cd; })
+		.rollup(function(v) {
+			return v.length;
+		})			
+		.entries(filteredData)
+		
+	console.log(highrisk);
+		
+	
+	var historicalBarChart = [
+	{
+		key: "totals",
+		values: []
+	}
+		
+	];
+
+	highrisk.forEach(function(d){
+		d.values = +d.values
+		historicalBarChart[0].values.push(d)
+		console.log(d);
+	})
+	
+
+
+ 	nv.addGraph(function() {
+		
+   		var chart = nv.models.discreteBarChart()
+       		.x(function (d) { console.log(d); return +d.key })
+       		.y(function (d) { return +d.values })
+       		//.staggerLabels(true)
+       		//.tooltips(true)
+       		.showValues(true)
+ 
+ 	  	d3.select('#chart')
+    			.datum(historicalBarChart)
+    			.attr("id", function (d) { console.log(d); })
+    		.transition().duration(500)
+       			.call(chart);
+ 
+   		nv.utils.windowResize(chart.update);
+   		return chart;
+ 	});
+	
+ });
+
+
+
+  
+</script>
+</body>
+</html>

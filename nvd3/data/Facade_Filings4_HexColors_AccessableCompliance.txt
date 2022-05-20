@@ -1,0 +1,17 @@
+Safe (OK): #3C7CAA
+Safe/Repair (SWARMP): #3077A6
+Precautionary (PR): #A86500
+Ongoing Maint. (OM): #44832F
+Unsafe (UN): #D73B2D
+No Report Filed (NR): #757575
+
+Bar Chart Total: #757575
+Manhattan: no change
+Bronx: #3874C7
+Brooklyn: #C25700
+Queens: #B35900
+
+Active Sidewalk Sheds Map
+CONSTR: #506C7C
+MAINT: #41702E
+Staten Island: #278227

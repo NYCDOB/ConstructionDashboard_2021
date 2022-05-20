@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="../build/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+    <script src="../build/nv.d3.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+    <style>
+        text {
+            font: 14px Lato;
+        }
+        svg {
+            display: block;
+        }
+        html, body, #chart1, svg {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chart1">
+    <svg></svg>
+</div>
+
+<script>
+
+    historicalBarChart = [
+  {
+    key: "Boilers Avg Wait Time For Inspection (days)",
+    values: [
+      
+      { 
+        "label" : "Jun-15" , 
+        "color" : "#1f77b4",
+        "value" : 15.5
+      } , 
+      { 
+        "label" : "Jul-15" , 
+        "color" : "#1f77b4",
+        "value" : 15.6
+      } , 
+      { 
+        "label" : "Aug-15" ,
+        "color" : "#1f77b4",
+        "value" : 17.4
+      } , 
+      { 
+        "label" : "Sep-15" , 
+        "color" : "#1f77b4",
+        "value" : 17.8
+      } , 
+      { 
+        "label" : "Oct-15" , 
+        "color" : "#1f77b4",
+        "value" : 28.8
+      } , 
+      { 
+        "label" : "Nov-15" , 
+        "color" : "#1f77b4",
+        "value" : 34.8
+      },
+      { 
+        "label" : "Dec-15" , 
+        "color" : "#1f77b4",
+        "value" : 23.6
+      },
+      { 
+        "label" : "Jan-16" , 
+        "color" : "#1f77b4",
+        "value" : 9.5
+      },
+      { 
+        "label" : "Feb-16" ,
+        "color" : "#1f77b4",
+        "value" : 13.9
+      },
+      { 
+        "label" : "Mar-16" , 
+        "color" : "#1f77b4",
+        "value" : 8.6
+      },
+      { 
+        "label" : "Apr-16" , 
+        "color" : "#1f77b4",
+        "value" : 7.5
+      },
+      { 
+        "label" : "May-16" , 
+        "color" : "#1f77b4",
+        "value" : 8.4
+      },
+	  { 
+        "label" : "Jun-16" , 
+        "color" : "#1f77b4",
+        "value" : 7.7
+      }	 
+    ]
+  }
+]
+;
+
+    nv.addGraph(function() {
+        var chart = nv.models.discreteBarChart()
+            .x(function(d) { return d.label })
+            .y(function(d) { return d.value })
+            .staggerLabels(true)
+            //.staggerLabels(historicalBarChart[0].values.length > 8)
+            .showValues(true)
+            //.forceY([250,310])
+            //.margin({left: 100}) 
+            //.margin({right: 100}) 
+            .duration(300)
+
+
+    chart.yAxis
+        .axisLabel('Boilers Avg Wait Time For Inspection (days)')
+		.axisLabelDistance(-10)
+         .tickFormat(d3.format('.2s'))
+         .ticks(8);
+
+    chart.valueFormat(d3.format('.3s'));
+
+        d3.select('#chart1 svg')
+            .datum(historicalBarChart)
+            .call(chart);
+
+        nv.utils.windowResize(chart.update);
+        return chart;
+    });
+
+
+</script>
+</body>
+</html>

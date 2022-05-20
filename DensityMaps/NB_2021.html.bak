@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+    <title>New Building Permits Density Time Series</title>
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+	<script src="static/chroniton.js"></script>
+	<link href="static/chroniton.css" rel="stylesheet">
+	
+	<style>
+		h1 {
+			font-size: 24px;
+		}
+
+	</style>
+</head>
+<div id="stats">
+<h1>
+	<font color="#8d9093">
+	New Building Permits<br/>
+	Year: </font><font color="#2E648C"><span id="year">2000</span></font>
+</h1><br/><br/>
+<h2>
+	<font color="#8d9093">
+	Citywide Total: </font><font color="#2E648C"><span id="total">8,096</span></font><br/>
+	<i><font color="#2E648C">
+	<span id="pctChg">+20.75% </span></font><font size=2px color="#8d9093"> from previous year</font></i><br/><br/>
+	<font color="#8d9093">
+	<!-- Citywide Average: </font><font color="#2E648C"><span id="avg">27.4</span></font><br/><br/> -->
+	<!-- <font color="#8d9093"> -->
+	Community District with<br/>Highest Permit Count: </font><font color="#2E648C"><span id="most">503</span></font><br/><br/>
+	
+	<i><font size=2px color="#2E648C"><span id="txt1">Concentrations of New Building</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt2">permits are issued on the southern</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt3">end, as well as Downtown Staten</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt4">Island. New construction is</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt5">prevalent in Williamsburg and</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt6">Bed-Stuy.</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt7"> </span></font></i>
+	
+</h2>
+</div>
+<!-- <h2> -->
+	<!-- <font size="18px">Year: <span id="year">2000</span></font> -->
+<!-- </h2> -->
+<div id="chart"></div>
+<div id="slider">
+</div>  
+<div id="main-wrapper">
+    
+</div><!-- @end #main-wrapper -->
+
+<div id="tooltip" class="tooltip">
+    <h3 class="name"></h3>
+	    <div data-metric="count" class="line">
+		New Building Permits (<span id="year"></span>): <div class="count_val val"></div>
+    </div>
+</div>
+
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/queue.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+
+
+
+
+<script>
+
+
+<!-- var width = 960, -->
+    <!-- height = 600, -->
+	var width = 1064,
+    height = 820,
+    center = [width / 2, height / 2],
+    defaultFill = "#E1E1E1";
+
+//var color_domain = [23,621,1109,1762,3135,5613]
+var color_domain = [2,3,4,5,6,7,8,9]
+var ext_color_domain = [1,2,3,4,5,6,7,8,9]
+var legend_labels = ["LOW", " ", " ", " ", " ", " ", " ", " ", "HIGH"]
+var color = d3.scale.threshold()
+	.domain(color_domain)
+	//.range(["#3288bd", "#66c2a5", "#abdda4", "#e6f598", "#ffffbf", "#fee08b", "#fdae61", "#f46d43", "#d53e4f"]);
+	.range(["#5183BD", "#7799BD", "#97ACBA", "#B9C4B9", "#DBDBB6", "#BFAD91", "#A3816F", "#875A50", "#6E3936"]);
+
+var projection = d3.geo.mercator()
+    .scale(83000)
+	.center( [-73.9,40.705] )
+    .translate([width / 2, height / 2]);
+
+var path = d3.geo.path()
+    .projection(projection);
+	
+var svg = d3.select("body #main-wrapper").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var g = svg.append("g");
+
+var tooltip = d3.select("#tooltip")
+	.attr("class", "tooltip")
+	.style("opacity", 0);
+ 
+var CURR_SELECT = ["id"];
+
+var startYear = 2000;
+var endYear = 2021;
+var currentYear = startYear;
+var countById = d3.map();
+
+onload = update2000();
+
+function currentData() {
+	switch(currentYear.toString()) {
+		case '2000':
+			update2000();
+			break;
+		case '2001':
+			update2001();
+			break;
+		case '2002':
+			update2002();
+			break;
+		case '2003':
+			update2003();
+			break;
+		case '2004':
+			update2004();
+			break;
+		case '2005':
+			update2005();
+			break;
+		case '2006':
+			update2006();
+			break;
+		case '2007':
+			update2007();
+			break;
+		case '2008':
+			update2008();
+			break;
+		case '2009':
+			update2009();
+			break;
+		case '2010':
+			update2010();
+			break;
+		case '2011':
+			update2011();
+			break;
+		case '2012':
+			update2012();
+			break;
+		case '2013':
+			update2013();
+			break;
+		case '2014':
+			update2014();
+			break;
+		case '2015':
+			update2015();
+			break;
+		case '2016':
+			update2016();
+			break;
+		case '2017':
+			update2017();
+			break;
+		case '2018':
+			update2018();
+			break;
+		case '2019':
+			update2019();
+			break;
+		case '2020':
+			update2020();
+			break;
+		case '2021':
+			update2021();
+		break;
+	}
+}
+
+// Load data
+function update2000() {
+queue()
+    .defer(d3.json, "data/NB2000_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2000.csv", typeAndSet)
+	.await(ready_2000);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(8096);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+20.75%");
+	d3.select("#txt1").html("Concentrations of New Building");
+	d3.select("#txt2").html("permits are issued on the southern");
+	d3.select("#txt3").html("end, as well as Downtown Staten");
+	d3.select("#txt4").html("Island. New construction is");
+	d3.select("#txt5").html("prevalent in Williamsburg and");
+	d3.select("#txt6").html("Bed-Stuy.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+
+function ready_2000(error, NB2000_DecDeg_topoJson) {
+	//var countById= {};
+	//var countById = d3.map();
+	
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2000_DecDeg_topoJson, NB2000_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		
+		.transition().duration(500)
+		updateClasses();
+	
+}
+function update2001() {
+queue()
+    .defer(d3.json, "data/NB2001_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2001.csv", typeAndSet)
+	.await(ready_2001);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(10444);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+29.00%");
+	d3.select("#txt1").html("Concentrations of New Building");
+	d3.select("#txt2").html("permits are issued on the southern");
+	d3.select("#txt3").html("end, as well as Downtown Staten");
+	d3.select("#txt4").html("Island. New construction is");
+	d3.select("#txt5").html("prevalent in Williamsburg and");
+	d3.select("#txt6").html("Bed-Stuy.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+
+function ready_2001(error, NB2001_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2001_DecDeg_topoJson, NB2001_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		.transition().duration(500)
+		updateClasses();
+
+}
+function update2002() {
+queue()
+    .defer(d3.json, "data/NB2002_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2002.csv", typeAndSet)
+	.await(ready_2002);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(11019);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+5.51%");
+	d3.select("#txt1").html("Concentrations of New Building");
+	d3.select("#txt2").html("permits are issued on the southern");
+	d3.select("#txt3").html("end, as well as Downtown Staten");
+	d3.select("#txt4").html("Island. New construction is");
+	d3.select("#txt5").html("prevalent in Williamsburg and");
+	d3.select("#txt6").html("Bed-Stuy.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+
+function ready_2002(error, NB2002_DecDeg_topoJson) {
+
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2002_DecDeg_topoJson, NB2002_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+
+		.transition().duration(500)
+		updateClasses();
+}
+function update2003() {
+queue()
+    .defer(d3.json, "data/NB2003_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2003.csv", typeAndSet)
+	.await(ready_2003);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(13147);
+	d3.select("#most").html(501);
+	d3.select("#pctChg").html("+19.31%");
+	d3.select("#txt1").html("Concentrations of New Building");
+	d3.select("#txt2").html("permits are issued on the southern");
+	d3.select("#txt3").html("end, as well as Downtown Staten");
+	d3.select("#txt4").html("Island. New construction is");
+	d3.select("#txt5").html("prevalent in Williamsburg and");
+	d3.select("#txt6").html("Bed-Stuy.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+
+function ready_2003(error, NB2003_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2003_DecDeg_topoJson, NB2003_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2004() {
+queue()
+    .defer(d3.json, "data/NB2004_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2004.csv", typeAndSet)
+	.await(ready_2004);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(15789);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+20.10%");
+	d3.select("#txt1").html("Concentrations of New Building");
+	d3.select("#txt2").html("permits are issued on the southern");
+	d3.select("#txt3").html("end, as well as Downtown Staten");
+	d3.select("#txt4").html("Island. New construction is");
+	d3.select("#txt5").html("prevalent in Williamsburg and");
+	d3.select("#txt6").html("Bed-Stuy.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+
+function ready_2004(error, NB2004_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2004_DecDeg_topoJson, NB2004_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2005() {
+queue()
+    .defer(d3.json, "data/NB2005_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2005.csv", typeAndSet)
+	.await(ready_2005);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(17361);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+9.96%");
+	d3.select("#txt1").html("Brooklyn new construction spans");
+	d3.select("#txt2").html("from Williamsburg to East New");
+	d3.select("#txt3").html("York. Pockets of development");
+	d3.select("#txt4").html("emerge in the South Bronx, as");
+	d3.select("#txt5").html("well as Jamaica and Far Rockaway,");
+	d3.select("#txt6").html("Queens.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+
+function ready_2005(error, NB2005_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2005_DecDeg_topoJson, NB2005_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2006() {
+queue()
+    .defer(d3.json, "data/NB2006_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2006.csv", typeAndSet)
+	.await(ready_2006);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(16652);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("-4.08%");
+	d3.select("#txt1").html("Brooklyn new construction spans");
+	d3.select("#txt2").html("from Williamsburg to East New");
+	d3.select("#txt3").html("York. Pockets of development");
+	d3.select("#txt4").html("emerge in the South Bronx, as");
+	d3.select("#txt5").html("well as Jamaica and Far Rockaway,");
+	d3.select("#txt6").html("Queens.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+
+function ready_2006(error, NB2006_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2006_DecDeg_topoJson, NB2006_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2007() {
+queue()
+    .defer(d3.json, "data/NB2007_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2007.csv", typeAndSet)
+	.await(ready_2007);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(15087);
+	d3.select("#most").html(412);
+	d3.select("#pctChg").html("-9.40%");
+	d3.select("#txt1").html("Brooklyn new construction spans");
+	d3.select("#txt2").html("from Williamsburg to East New");
+	d3.select("#txt3").html("York. Pockets of development");
+	d3.select("#txt4").html("emerge in the South Bronx, as");
+	d3.select("#txt5").html("well as Jamaica and Far Rockaway,");
+	d3.select("#txt6").html("Queens.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2007(error, NB2007_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2007_DecDeg_topoJson, NB2007_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2008() {
+queue()
+    .defer(d3.json, "data/NB2008_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2008.csv", typeAndSet)
+	.await(ready_2008);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(11239);
+	d3.select("#most").html(301);
+	d3.select("#pctChg").html("-25.51%");
+	d3.select("#txt1").html("Brooklyn new construction spans");
+	d3.select("#txt2").html("from Williamsburg to East New");
+	d3.select("#txt3").html("York. Pockets of development");
+	d3.select("#txt4").html("emerge in the South Bronx, as");
+	d3.select("#txt5").html("well as Jamaica and Far Rockaway,");
+	d3.select("#txt6").html("Queens.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2008(error, NB2008_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2008_DecDeg_topoJson, NB2008_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2009() {
+queue()
+    .defer(d3.json, "data/NB2009_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2009.csv", typeAndSet)
+	.await(ready_2009);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(8957);
+	d3.select("#most").html(301);
+	d3.select("#pctChg").html("-20.30%");
+	d3.select("#txt1").html("Overall new development activity");
+	d3.select("#txt2").html("levels-off citywide with some");
+	d3.select("#txt3").html("continuation of New Building");
+	d3.select("#txt4").html("permits issued in Brooklyn and");
+	d3.select("#txt5").html("Queens.");
+	d3.select("#txt6").html("");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2009(error, NB2009_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2009_DecDeg_topoJson, NB2009_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2010() {
+queue()
+    .defer(d3.json, "data/NB2010_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2010.csv", typeAndSet)
+	.await(ready_2010);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(6486);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("-27.59%");
+	d3.select("#txt1").html("Overall new development activity");
+	d3.select("#txt2").html("levels-off citywide with some");
+	d3.select("#txt3").html("continuation of New Building");
+	d3.select("#txt4").html("permits issued in Brooklyn and");
+	d3.select("#txt5").html("Queens.");
+	d3.select("#txt6").html("");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2010(error, NB2010_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2010_DecDeg_topoJson, NB2010_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2011() {
+queue()
+    .defer(d3.json, "data/NB2011_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2011.csv", typeAndSet)
+	.await(ready_2011);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(5241);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("-19.20%");
+	d3.select("#txt1").html("Overall new development activity");
+	d3.select("#txt2").html("levels-off citywide with some");
+	d3.select("#txt3").html("continuation of New Building");
+	d3.select("#txt4").html("permits issued in Brooklyn and");
+	d3.select("#txt5").html("Queens.");
+	d3.select("#txt6").html("");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2011(error, NB2011_DecDeg_topoJson) {
+	svg.selectAll("path").remove();	
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2011_DecDeg_topoJson, NB2011_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2012() {
+queue()
+    .defer(d3.json, "data/NB2012_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2012.csv", typeAndSet)
+	.await(ready_2012);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(5181);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("-1.14%");
+	d3.select("#txt1").html("New construction picks up with");
+	d3.select("#txt2").html("a broad concentration of");
+	d3.select("#txt3").html("development in Williamsburg,");
+	d3.select("#txt4").html("Bed-Stuy, and Downtown Brooklyn.");
+	d3.select("#txt5").html("Midtown and Lower Manhattan see");
+	d3.select("#txt6").html("a moderate increase in new");
+	d3.select("#txt7").html("construction.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2012(error, NB2012_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2012_DecDeg_topoJson, NB2012_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2013() {
+queue()
+    .defer(d3.json, "data/NB2013_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2013.csv", typeAndSet)
+	.await(ready_2013);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(5510);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+6.35%");
+	d3.select("#txt1").html("New construction picks up with");
+	d3.select("#txt2").html("a broad concentration of");
+	d3.select("#txt3").html("development in Williamsburg,");
+	d3.select("#txt4").html("Bed-Stuy, and Downtown Brooklyn.");
+	d3.select("#txt5").html("Midtown and Lower Manhattan see");
+	d3.select("#txt6").html("a moderate increase in new");
+	d3.select("#txt7").html("construction.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2013(error, NB2013_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2013_DecDeg_topoJson, NB2013_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2014() {
+queue()
+    .defer(d3.json, "data/NB2014_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2014.csv", typeAndSet)
+	.await(ready_2014);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(6496);
+	d3.select("#most").html(414);
+	d3.select("#pctChg").html("+17.89%");
+	d3.select("#txt1").html("New construction picks up with");
+	d3.select("#txt2").html("a broad concentration of");
+	d3.select("#txt3").html("development in Williamsburg,");
+	d3.select("#txt4").html("Bed-Stuy, and Downtown Brooklyn.");
+	d3.select("#txt5").html("Midtown and Lower Manhattan see");
+	d3.select("#txt6").html("a moderate increase in new");
+	d3.select("#txt7").html("construction.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2014(error, NB2014_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2014_DecDeg_topoJson, NB2014_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2015() {
+queue()
+    .defer(d3.json, "data/NB2015_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2015.csv", typeAndSet)
+	.await(ready_2015);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(7425);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+14.30%");
+	d3.select("#txt1").html("New Building permit activity");
+	d3.select("#txt2").html("continues in North Brooklyn");
+	d3.select("#txt3").html("and East New York, with some");
+	d3.select("#txt4").html("new pockets of activity in");
+	d3.select("#txt5").html("Long Island City, Queens and");
+	d3.select("#txt6").html("Central Brooklyn.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2015(error, NB2015_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2015_DecDeg_topoJson, NB2015_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2016() {
+queue()
+    .defer(d3.json, "data/NB2016_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2016.csv", typeAndSet)
+	.await(ready_2016);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(7526);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+1.36%");
+	d3.select("#txt1").html("New Building permit activity");
+	d3.select("#txt2").html("continues in North Brooklyn");
+	d3.select("#txt3").html("and East New York, with some");
+	d3.select("#txt4").html("new pockets of activity in");
+	d3.select("#txt5").html("Long Island City, Queens and");
+	d3.select("#txt6").html("Central Brooklyn.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2016(error, NB2016_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2016_DecDeg_topoJson, NB2016_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2017() {
+queue()
+    .defer(d3.json, "data/NB2017_DecDeg_topoJson.json")
+	.await(ready_2017);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(8281);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+10.03%");
+	d3.select("#txt1").html("New Building permit activity");
+	d3.select("#txt2").html("continues in North Brooklyn");
+	d3.select("#txt3").html("and East New York, with some");
+	d3.select("#txt4").html("new pockets of activity in");
+	d3.select("#txt5").html("Long Island City, Queens and");
+	d3.select("#txt6").html("Central Brooklyn.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2017(error, NB2017_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2017_DecDeg_topoJson, NB2017_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2018() {
+queue()
+    .defer(d3.json, "data/NB2018_DecDeg_topoJson.json")
+	.await(ready_2018);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(8085);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("-2.36%");
+	d3.select("#txt1").html("New Building permit activity");
+	d3.select("#txt2").html("continues in North Brooklyn");
+	d3.select("#txt3").html("and East New York, with some");
+	d3.select("#txt4").html("new pockets of activity in");
+	d3.select("#txt5").html("Long Island City, Queens and");
+	d3.select("#txt6").html("Central Brooklyn.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2018(error, NB2018_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2018_DecDeg_topoJson, NB2018_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2019() {
+queue()
+    .defer(d3.json, "data/NB2019_DecDeg_topoJson.json")
+	.await(ready_2019);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(7870);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("-2.66%");
+	d3.select("#txt1").html("New Building permit activity");
+	d3.select("#txt2").html("is prevalent in Williamsburg");
+	d3.select("#txt3").html("and Bushwick in Brooklyn,");
+	d3.select("#txt4").html("Long Island City in Queens,");
+	d3.select("#txt5").html("and Midtown Manhattan.");
+	d3.select("#txt6").html("");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2019(error, NB2019_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2019_DecDeg_topoJson, NB2019_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2020() {
+queue()
+    .defer(d3.json, "data/NB2020_DecDeg_topoJson.json")
+	.await(ready_2020);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(6455);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("-17.98%");
+	d3.select("#txt1").html("New Building permit activity");
+	d3.select("#txt2").html("is prevalent in Hunters Point,");
+	d3.select("#txt3").html("Long Island City, and North");
+	d3.select("#txt4").html("Corona in Queens and East");
+	d3.select("#txt5").html("Williamsburg, Bushwick in");
+	d3.select("#txt6").html("Brooklyn, and Midtown in");
+	d3.select("#txt7").html("Manhattan.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2020(error, NB2020_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2020_DecDeg_topoJson, NB2020_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2021() {
+queue()
+    .defer(d3.json, "data/NB2021_DecDeg_topoJson.json")
+	.await(ready_2020);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(7231);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+12.02%");
+	d3.select("#txt1").html("New Building permit activity");
+	d3.select("#txt2").html("is prevalent Williamsburg");
+	d3.select("#txt3").html("and Greenpoint in Brooklyn");
+	d3.select("#txt4").html("and Astoria, Corona, and");
+	d3.select("#txt5").html("Flushing in Queens and");
+	d3.select("#txt6").html("Fordham in the Bronx.");
+	d3.select("#txt7").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2021(error, NB2021_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(NB2021_DecDeg_topoJson, NB2021_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+
+d3.select("#slider") 
+    .call(
+      chroniton()  
+        .domain([new Date(startYear, 1, 1), new Date(endYear, 1, 1)])  
+        .labelFormat(function(date) {
+          return Math.ceil(date.getFullYear());  
+        })
+        .width(600)  
+	.on('change', function(date) { 
+	  var newYear = Math.ceil(date.getFullYear());  
+	  if (newYear != currentYear) { 
+		currentYear = newYear;
+		//g.selectAll("path").remove(); 
+		g.selectAll("path")
+			//.transition().duration(500);
+		//ready_2000();
+		//updateData();
+		currentData();
+	  }
+	})
+	.playButton(true) 
+	.playbackRate(0.3)
+	//.loop(true)
+);
+
+var legend = svg.selectAll("g.legend")
+	.data(ext_color_domain)
+	.enter().append("g")
+	.style("font-size", "14px")
+	.style("font-family", "Arial, Helvetica, sans-serif")
+	.attr("class", "legend");
+	
+var ls_w = 25, ls_h = 25;
+
+legend.append("rect")
+	.attr("x", 50)
+	.attr("y", function(d, i){return height - (i*ls_h) - 2*ls_h;})
+	<!-- .attr('transform', 'translate(10, -720)') /* XY position of legend*/ -->
+	.attr('transform', 'translate(220, -555)') /* XY position of legend*/
+	.attr("width", ls_w)
+	.attr("height", ls_h)
+	.style("fill", function(d, i){return color(d);})
+	//.style("opacity", 0.8);
+legend.append("text")
+	.attr("x", 80)
+	.attr("y", function(d, i){return height - (i*ls_h) - ls_h - 5;})
+	<!-- .attr('transform', 'translate(10, -720)') /* XY position of legend*/ -->
+	.attr('transform', 'translate(220, -555)') /* XY position of legend*/
+	.text(function(d, i){return legend_labels[i];});
+
+function typeAndSet(d) {
+    d.count = +d.count;
+    countById.set(d.FIPS, d);   
+}
+
+<!-- function getDMcolor(d) { -->
+	<!-- return d > 8 ? '#d53e4f' : -->
+		   <!-- d > 7  ? '#f46d43' : -->
+		   <!-- d > 6  ? '#fdae61' : -->
+		   <!-- d > 5  ? '#fee08b' : -->
+		   <!-- d > 4  ? '#ffffbf' : -->
+		   <!-- d > 3   ? '#e6f598' : -->
+		   <!-- d > 2   ? '#abdda4' : -->
+		   <!-- d > 1   ? '#66c2a5' : -->
+					  <!-- '#3288bd';  -->
+<!-- } -->
+function getDMcolor(d) {
+	return d > 8 ? '#6E3936' :
+		   d > 7  ? '#875A50' :
+		   d > 6  ? '#A3816F' :
+		   d > 5  ? '#BFAD91' :
+		   d > 4  ? '#DBDBB6' :
+		   d > 3   ? '#B9C4B9' :
+		   d > 2   ? '#97ACBA' :
+		   d > 1   ? '#7799BD' :
+					  '#5183BD'; 
+}
+
+function updateClasses() {
+	svg.selectAll(".collection path")
+		.attr("fill", function (d){return getDMcolor(d.id); })
+		//.attr("opacity", 0.9)
+}
+
+
+
+d3.select(self.frameElement).style("height", height + "px");
+
+</script>

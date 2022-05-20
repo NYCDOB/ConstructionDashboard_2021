@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+    <title>Demolition Permits Density Time Series</title>
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen" />
+	<script src="static/chroniton.js"></script>
+	<link href="static/chroniton.css" rel="stylesheet">
+	<style>
+		h1 {
+			font-size: 24px;
+		}
+	</style>
+</head>
+<div id="stats">
+<h1>
+	<font color="#8d9093">
+	Demolition Permits<br/>
+	Year: </font><font color="#2E648C"><span id="year">2000</span></font>
+</h1><br/>
+<h2>
+	<font color="#8d9093">
+	Citywide Total: </font><font color="#2E648C"><span id="total">1,562</span></font><br/>
+	<i><font color="#2E648C">
+	<span id="pctChg">+15.96% </span></font><font size=2px color="#8d9093"> from previous year</font></i><br/><br/>
+	<font color="#8d9093">
+	<!-- Citywide Average: </font><font color="#2E648C"><span id="avg">27.4</span></font><br/><br/> -->
+	<!-- <font color="#8d9093"> -->
+	Community District with<br/>Highest Permit Count: </font><font color="#2E648C"><span id="most">503</span></font><br/><br/>
+	<i><font size=2px color="#2E648C"><span id="txt1">Demolition activity surges in South</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt2">Brooklyn around Bensonhurst and</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt3">Sheepshead Bay, signaling future</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt4">development in this area of</span></font></i><br/>
+	<i><font size=2px color="#2E648C"><span id="txt5">low-density housing.</span></font></i>
+</h2>
+</div>
+<!-- <h2> -->
+	<!-- <font size="18px">Year: <span id="year">2000</span></font> -->
+<!-- </h2> -->
+<div id="chart"></div>
+<div id="slider">
+</div>  
+<div id="main-wrapper">
+    
+</div><!-- @end #main-wrapper -->
+
+<div id="tooltip" class="tooltip">
+    <h3 class="name"></h3>
+	    <div data-metric="count" class="line">
+		Demolition Permits (<span id="year"></span>): <div class="count_val val"></div>
+    </div>
+</div>
+
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/queue.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+
+
+
+
+<script>
+<!-- var width = 960, -->
+    <!-- height = 600, -->
+	var width = 1064,
+    height = 820,
+    center = [width / 2, height / 2],
+    defaultFill = "#E1E1E1";
+//var color_domain = [23,621,1109,1762,3135,5613]
+var color_domain = [2,3,4,5,6,7,8,9]
+var ext_color_domain = [1,2,3,4,5,6,7,8,9]
+var legend_labels = ["LOW", " ", " ", " ", " ", " ", " ", " ", "HIGH"]
+var color = d3.scale.threshold()
+	.domain(color_domain)
+	.range(["#457571", "#668C81", "#8BA692", "#B1BFA3", "#DBDBB6", "#BFAD91", "#A3816F", "#875A50", "#6E3936"]);
+var projection = d3.geo.mercator()
+    .scale(83000)
+	.center( [-73.9,40.705] )
+    .translate([width / 2, height / 2]);
+var path = d3.geo.path()
+    .projection(projection);
+	
+var svg = d3.select("body #main-wrapper").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+var g = svg.append("g");
+var tooltip = d3.select("#tooltip")
+	.attr("class", "tooltip")
+	.style("opacity", 0);
+ 
+var CURR_SELECT = ["id"];
+var startYear = 2000;
+var endYear = 2021;
+var currentYear = startYear;
+var countById = d3.map();
+onload = update2000();
+function currentData() {
+	switch(currentYear.toString()) {
+		case '2000':
+			update2000();
+			break;
+		case '2001':
+			update2001();
+			break;
+		case '2002':
+			update2002();
+			break;
+		case '2003':
+			update2003();
+			break;
+		case '2004':
+			update2004();
+			break;
+		case '2005':
+			update2005();
+			break;
+		case '2006':
+			update2006();
+			break;
+		case '2007':
+			update2007();
+			break;
+		case '2008':
+			update2008();
+			break;
+		case '2009':
+			update2009();
+			break;
+		case '2010':
+			update2010();
+			break;
+		case '2011':
+			update2011();
+			break;
+		case '2012':
+			update2012();
+			break;
+		case '2013':
+			update2013();
+			break;
+		case '2014':
+			update2014();
+			break;
+		case '2015':
+			update2015();
+			break;
+		case '2016':
+			update2016();
+			break;
+		case '2017':
+			update2017();
+			break;
+		case '2018':
+			update2018();
+			break;
+		case '2019':
+			update2019();
+			break;
+		case '2020':
+			update2020();
+			break;
+		case '2021':
+			update2021();
+		break;
+	}
+}
+// Load data
+function update2000() {
+queue()
+    .defer(d3.json, "data/DM2000_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2000.csv", typeAndSet)
+	.await(ready_2000);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1562);
+	d3.select("#avg").html(27.4);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+15.96%");
+	d3.select("#txt1").html("Demolition activity surges in South");
+	d3.select("#txt2").html("Brooklyn around Bensonhurst and");
+	d3.select("#txt3").html("Sheepshead Bay, signaling future");
+	d3.select("#txt4").html("development in this area of");
+	d3.select("#txt5").html("low-density housing.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2000(error, DM2000_DecDeg_topoJson) {
+	//var countById= {};
+	//var countById = d3.map();
+	
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2000_DecDeg_topoJson, DM2000_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		
+		.transition().duration(500)
+		updateClasses();
+	
+}
+function update2001() {
+queue()
+    .defer(d3.json, "data/DM2001_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2001.csv", typeAndSet)
+	.await(ready_2001);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1592);
+	d3.select("#avg").html(26.5);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+1.92%");
+	d3.select("#txt1").html("Demolition activity surges in South");
+	d3.select("#txt2").html("Brooklyn around Bensonhurst and");
+	d3.select("#txt3").html("Sheepshead Bay, signaling future");
+	d3.select("#txt4").html("development in this area of");
+	d3.select("#txt5").html("low-density housing.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2001(error, DM2001_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2001_DecDeg_topoJson, DM2001_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		.transition().duration(500)
+		updateClasses();
+}
+function update2002() {
+queue()
+    .defer(d3.json, "data/DM2002_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2002.csv", typeAndSet)
+	.await(ready_2002);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(2023);
+	d3.select("#avg").html(33.7);
+	d3.select("#most").html(502);
+	d3.select("#pctChg").html("+27.07%");
+	d3.select("#txt1").html("Demolition activity surges in South");
+	d3.select("#txt2").html("Brooklyn around Bensonhurst and");
+	d3.select("#txt3").html("Sheepshead Bay, signaling future");
+	d3.select("#txt4").html("development in this area of");
+	d3.select("#txt5").html("low-density housing.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2002(error, DM2002_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2002_DecDeg_topoJson, DM2002_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		.transition().duration(500)
+		updateClasses();
+}
+function update2003() {
+queue()
+    .defer(d3.json, "data/DM2003_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2003.csv", typeAndSet)
+	.await(ready_2003);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(2390);
+	d3.select("#avg").html(40.5);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+18.14%");
+	d3.select("#txt1").html("Demolition activity surges in South");
+	d3.select("#txt2").html("Brooklyn around Bensonhurst and");
+	d3.select("#txt3").html("Sheepshead Bay, signaling future");
+	d3.select("#txt4").html("development in this area of");
+	d3.select("#txt5").html("low-density housing.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2003(error, DM2003_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2003_DecDeg_topoJson, DM2003_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2004() {
+queue()
+    .defer(d3.json, "data/DM2004_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2004.csv", typeAndSet)
+	.await(ready_2004);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(3025);
+	d3.select("#avg").html(51.3);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+26.57%");
+	d3.select("#txt1").html("Demolition activity surges in South");
+	d3.select("#txt2").html("Brooklyn around Bensonhurst and");
+	d3.select("#txt3").html("Sheepshead Bay, signaling future");
+	d3.select("#txt4").html("development in this area of");
+	d3.select("#txt5").html("low-density housing.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2004(error, DM2004_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2004_DecDeg_topoJson, DM2004_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2005() {
+queue()
+    .defer(d3.json, "data/DM2005_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2005.csv", typeAndSet)
+	.await(ready_2005);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(3687);
+	d3.select("#avg").html(60.4);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+21.88%");
+	d3.select("#txt1").html("Demolition activity surges in South");
+	d3.select("#txt2").html("Brooklyn around Bensonhurst and");
+	d3.select("#txt3").html("Sheepshead Bay, signaling future");
+	d3.select("#txt4").html("development in this area of");
+	d3.select("#txt5").html("low-density housing.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2005(error, DM2005_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2005_DecDeg_topoJson, DM2005_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2006() {
+queue()
+    .defer(d3.json, "data/DM2006_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2006.csv", typeAndSet)
+	.await(ready_2006);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(3901);
+	d3.select("#avg").html(66.1);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+5.80%");
+	d3.select("#txt1").html("7% of citywide demolition permits");
+	d3.select("#txt2").html("are issued in the North Brooklyn");
+	d3.select("#txt3").html("neighborhoods of Greenpoint and");
+	d3.select("#txt4").html("Williamsburg.");
+	d3.select("#txt5").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2006(error, DM2006_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2006_DecDeg_topoJson, DM2006_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2007() {
+queue()
+    .defer(d3.json, "data/DM2007_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2007.csv", typeAndSet)
+	.await(ready_2007);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(3505);
+	d3.select("#avg").html(59.4);
+	d3.select("#most").html(301);
+	d3.select("#pctChg").html("-10.15%");
+	d3.select("#txt1").html("7% of citywide demolition permits");
+	d3.select("#txt2").html("are issued in the North Brooklyn");
+	d3.select("#txt3").html("neighborhoods of Greenpoint and");
+	d3.select("#txt4").html("Williamsburg.");
+	d3.select("#txt5").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2007(error, DM2007_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2007_DecDeg_topoJson, DM2007_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2008() {
+queue()
+    .defer(d3.json, "data/DM2008_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2008.csv", typeAndSet)
+	.await(ready_2008);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(2653);
+	d3.select("#avg").html(44.2);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("-24.31%");
+	d3.select("#txt1").html("7% of citywide demolition permits");
+	d3.select("#txt2").html("are issued in the North Brooklyn");
+	d3.select("#txt3").html("neighborhoods of Greenpoint and");
+	d3.select("#txt4").html("Williamsburg.");
+	d3.select("#txt5").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2008(error, DM2008_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2008_DecDeg_topoJson, DM2008_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2009() {
+queue()
+    .defer(d3.json, "data/DM2009_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2009.csv", typeAndSet)
+	.await(ready_2009);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1422);
+	d3.select("#avg").html(24.5);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("-46.40%");
+	d3.select("#txt1").html("General economic decline leads");
+	d3.select("#txt2").html("to fewer demolition permits");
+	d3.select("#txt3").html("issued citywide. Although");
+	d3.select("#txt4").html("demolition activity is persistent");
+	d3.select("#txt5").html("in South Brooklyn.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2009(error, DM2009_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2009_DecDeg_topoJson, DM2009_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2010() {
+queue()
+    .defer(d3.json, "data/DM2010_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2010.csv", typeAndSet)
+	.await(ready_2010);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1094);
+	d3.select("#avg").html(18.4);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("-23.07%");
+	d3.select("#txt1").html("General economic decline leads");
+	d3.select("#txt2").html("to fewer demolition permits");
+	d3.select("#txt3").html("issued citywide. Although");
+	d3.select("#txt4").html("demolition activity is persistent");
+	d3.select("#txt5").html("in South Brooklyn.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2010(error, DM2010_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2010_DecDeg_topoJson, DM2010_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2011() {
+queue()
+    .defer(d3.json, "data/DM2011_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2011.csv", typeAndSet)
+	.await(ready_2011);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1177);
+	d3.select("#avg").html(19.9);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+7.59%");
+	d3.select("#txt1").html("Numerous demolitions occurring");
+	d3.select("#txt2").html("in Chelsea and Hudson Yards.");
+	d3.select("#txt3").html("Post Hurricane Sandy demolitions");
+	d3.select("#txt4").html("are prevalent on the east coast");
+	d3.select("#txt5").html("of Staten Island.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2011(error, DM2011_DecDeg_topoJson) {
+	svg.selectAll("path").remove();	
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2011_DecDeg_topoJson, DM2011_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2012() {
+queue()
+    .defer(d3.json, "data/DM2012_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2012.csv", typeAndSet)
+	.await(ready_2012);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1267);
+	d3.select("#avg").html(20.8);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+7.65%");
+	d3.select("#txt1").html("Numerous demolitions occurring");
+	d3.select("#txt2").html("in Chelsea and Hudson Yards.");
+	d3.select("#txt3").html("Post Hurricane Sandy demolitions");
+	d3.select("#txt4").html("are prevalent on the east coast");
+	d3.select("#txt5").html("of Staten Island.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2012(error, DM2012_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2012_DecDeg_topoJson, DM2012_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2013() {
+queue()
+    .defer(d3.json, "data/DM2013_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2013.csv", typeAndSet)
+	.await(ready_2013);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1575);
+	d3.select("#avg").html(26.7);
+	d3.select("#most").html(502);
+	d3.select("#pctChg").html("+24.31%");
+	d3.select("#txt1").html("Demolitions continue in Midtown,");
+	d3.select("#txt2").html("Staten Island, and Rockaway,");
+	d3.select("#txt3").html("with new demolition activity");
+	d3.select("#txt4").html("focused in Flushing, Queens.");
+	d3.select("#txt5").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2013(error, DM2013_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2013_DecDeg_topoJson, DM2013_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2014() {
+queue()
+    .defer(d3.json, "data/DM2014_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2014.csv", typeAndSet)
+	.await(ready_2014);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1869);
+	d3.select("#avg").html(31.2);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("+18.66%");
+	d3.select("#txt1").html("Demolitions continue in Midtown,");
+	d3.select("#txt2").html("Staten Island, and Rockaway,");
+	d3.select("#txt3").html("with new demolition activity");
+	d3.select("#txt4").html("focused in Flushing, Queens.");
+	d3.select("#txt5").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2014(error, DM2014_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2014_DecDeg_topoJson, DM2014_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2015() {
+queue()
+    .defer(d3.json, "data/DM2015_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2015.csv", typeAndSet)
+	.await(ready_2015);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(2188);
+	d3.select("#avg").html(36.5);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+17.07%");
+	d3.select("#txt1").html("High demolition activity in the");
+	d3.select("#txt2").html("Brooklyn neighborhoods of");
+	d3.select("#txt3").html("Bed-Stuy and Bushwick is in");
+	d3.select("#txt4").html("part related to future affordable");
+	d3.select("#txt5").html("housing development.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2015(error, DM2015_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2015_DecDeg_topoJson, DM2015_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2016() {
+queue()
+    .defer(d3.json, "data/DM2016_DecDeg_topoJson.json")
+	//.defer(d3.csv, "data/DM_2016.csv", typeAndSet)
+	.await(ready_2016);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(2252);
+	d3.select("#avg").html(37.5);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+2.93%");
+	d3.select("#txt1").html("High demolition activity in the");
+	d3.select("#txt2").html("Brooklyn neighborhoods of");
+	d3.select("#txt3").html("Bed-Stuy and Bushwick is in");
+	d3.select("#txt4").html("part related to future affordable");
+	d3.select("#txt5").html("housing development.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2016(error, DM2016_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2016_DecDeg_topoJson, DM2016_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2017() {
+queue()
+    .defer(d3.json, "data/DM2017_DecDeg_topoJson.json")
+	.await(ready_2017);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(2290);
+	d3.select("#avg").html(37.5);
+	d3.select("#most").html(502);
+	d3.select("#pctChg").html("+1.69%");
+	d3.select("#txt1").html("Demolition activity is prevalent in");
+	d3.select("#txt2").html("Williamsburg and Bushwick in");
+	d3.select("#txt3").html("Brooklyn, Midland Beach in Staten");
+	d3.select("#txt4").html("Island, and Willets Point and");
+	d3.select("#txt5").html("Flushing in Queens.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2017(error, DM2017_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2017_DecDeg_topoJson, DM2017_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2018() {
+queue()
+    .defer(d3.json, "data/DM2018_DecDeg_topoJson.json")
+	.await(ready_2018);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(2092);
+	d3.select("#avg").html(37.5);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("-8.65%");
+	d3.select("#txt1").html("Demolition activity is prevalent in");
+	d3.select("#txt2").html("Williamsburg, Bushwick and Borough");
+	d3.select("#txt3").html("Park in Brooklyn, Midtown in");
+	d3.select("#txt4").html("Manhattan, and Long Island City and");
+	d3.select("#txt5").html("Flushing in Queens.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2018(error, DM2018_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2018_DecDeg_topoJson, DM2018_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2019() {
+queue()
+    .defer(d3.json, "data/DM2019_DecDeg_topoJson.json")
+	.await(ready_2019);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(2122);
+	d3.select("#avg").html(37.5);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+1.43%");
+	d3.select("#txt1").html("Demolition activity is prevalent in");
+	d3.select("#txt2").html("Williamsburg, Clinton Hill, Borough");
+	d3.select("#txt3").html("Park, East Flatbush, and Midwood");
+	d3.select("#txt4").html("in Brooklyn, and Upper East Side");
+	d3.select("#txt5").html("in Manhattan.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2019(error, DM2019_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2019_DecDeg_topoJson, DM2019_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2020() {
+queue()
+    .defer(d3.json, "data/DM2020_DecDeg_topoJson.json")
+	.await(ready_2020);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1394);
+	d3.select("#avg").html(37.5);
+	d3.select("#most").html(503);
+	d3.select("#pctChg").html("-34.3%");
+	d3.select("#txt1").html("Demolition activity is prevalent in");
+	d3.select("#txt2").html("East Concourse-Concourse Village");
+	d3.select("#txt3").html("in the Bronx, Hunters Point, Long");
+	d3.select("#txt4").html("Island City in Queens, and Erasmus,");
+	d3.select("#txt5").html("Boerum Hill in Brooklyn.");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2020(error, DM2020_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2020_DecDeg_topoJson, DM2020_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+function update2021() {
+queue()
+    .defer(d3.json, "data/DM2021_DecDeg_topoJson.json")
+	.await(ready_2021);
+	d3.select("#year").html(currentYear);
+	d3.select("#total").html(1561);
+	d3.select("#avg").html(37.5);
+	d3.select("#most").html(407);
+	d3.select("#pctChg").html("+12%");
+	d3.select("#txt1").html("Demolition activity is prevalent in");
+	d3.select("#txt2").html("Fordham in the Bronx, Astoria in");
+	d3.select("#txt3").html("Queens, and Flatbush, Fort Greene");
+	d3.select("#txt4").html("and Gowanus in Brooklyn.");
+	d3.select("#txt5").html("");
+		<!-- .transition() -->
+		<!-- .duration(500); -->
+}
+function ready_2021(error, DM2021_DecDeg_topoJson) {
+	svg.selectAll("path").remove();
+	g.append("g")
+		.attr("class", "collection")
+		.selectAll("path")
+		.data(topojson.feature(DM2021_DecDeg_topoJson, DM2021_DecDeg_topoJson.objects.collection).features)
+		.enter().append("path")
+		.attr("d", path)
+
+		//.style("fill", function(d) {return color(countById[d.id]); })
+		.transition().duration(500)
+		updateClasses();
+}
+
+d3.select("#slider") 
+    .call(
+      chroniton()  
+        .domain([new Date(startYear, 1, 1), new Date(endYear, 1, 1)])  
+        .labelFormat(function(date) {
+          return Math.ceil(date.getFullYear());  
+        })
+        .width(600)  
+	.on('change', function(date) { 
+	  var newYear = Math.ceil(date.getFullYear());  
+	  if (newYear != currentYear) { 
+		currentYear = newYear;
+		//g.selectAll("path").remove(); 
+		g.selectAll("path")
+			//.transition().duration(500);
+		//ready_2000();
+		//updateData();
+		currentData();
+	  }
+	})
+	.playButton(true) 
+	.playbackRate(0.3)
+	//.loop(true)
+);
+var legend = svg.selectAll("g.legend")
+	.data(ext_color_domain)
+	.enter().append("g")
+	.style("font-size", "14px")
+	.style("font-family", "Arial, Helvetica, sans-serif")
+	.attr("class", "legend");
+	
+var ls_w = 25, ls_h = 25;
+legend.append("rect")
+	.attr("x", 50)
+	.attr("y", function(d, i){return height - (i*ls_h) - 2*ls_h;})
+	<!-- .attr('transform', 'translate(10, -720)') /* XY position of legend*/ -->
+	.attr('transform', 'translate(190, -555)') /* XY position of legend*/
+	.attr("width", ls_w)
+	.attr("height", ls_h)
+	.style("fill", function(d, i){return color(d);})
+	//.style("opacity", 0.8);
+legend.append("text")
+	.attr("x", 80)
+	.attr("y", function(d, i){return height - (i*ls_h) - ls_h - 5;})
+	<!-- .attr('transform', 'translate(10, -720)') /* XY position of legend*/ -->
+	.attr('transform', 'translate(190, -555)') /* XY position of legend*/
+	.text(function(d, i){return legend_labels[i];});
+function typeAndSet(d) {
+    d.count = +d.count;
+    countById.set(d.FIPS, d);   
+}
+function getDMcolor(d) {
+/* 	return d > 8 ? "#6E3936" : 
+		    d > 7  ? "#875A50" : 
+		    d > 6  ? "#A3816F" : 
+		    d > 5  ? "#BFAD91" : 
+		    d > 4  ? "#DBDBB6" : 
+		    d > 3   ? "#B1BFA3" : 
+		    d > 2   ? "#8BA692" : 
+		    d > 1   ? "#668C81" : 
+					   "#457571";  */
+	return d == 9 ? "#6E3936" :
+		   d == 8  ? "#875A50" :
+		   d == 7  ? "#A3816F" :
+		   d == 6  ? "#BFAD91" :
+		   d == 5 ? "#DBDBB6" :
+		   d == 4   ? "#B1BFA3" :
+		   d == 3  ? "#8BA692" :
+		   d == 2   ? "#668C81" :
+					  "#457571"; 
+				
+}
+function updateClasses() {
+	svg.selectAll(".collection path")
+		.attr("fill", function (d){return getDMcolor(d.id); })
+}
+d3.select(self.frameElement).style("height", height + "px");
+</script>

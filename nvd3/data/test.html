@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- <meta charset="utf-8"> -->
+    <!-- <link href="../build/nv.d3.css" rel="stylesheet" type="text/css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script> -->
+    <!-- <script src="../build/nv.d3_1.8.1.js"></script> -->
+	<!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel='stylesheet' type='text/css'> -->
+	
+	<meta charset="utf-8">
+    <link href="../build/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+    <script src="../build/nv.d3.js"></script>
+	
+	<!-- USE THE BELOW LIBRARY FOR TOOLTIP TO WORK ON LIVE VERSION -->
+	<!-- <script src="../build/nv.d3_1.8.1.js"></script>  -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel='stylesheet' type='text/css'>
+
+    <style>
+      text {
+            font: 12px sans-serif;
+        }
+        svg {
+            display: block;
+        }
+        html, body, svg {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            width: 100%;
+        }
+		
+		
+		
+    </style>
+</head>
+<body class='with-3d-shadow with-transitions'>
+
+
+<svg id="chart1"></svg>
+
+<script>
+function exampleData() {
+ return  [ 
+    {
+      key: "Cumulative Return",
+      values: [
+        { 
+          "label" : "A Label" ,
+          "value" : 10
+        } , 
+        { 
+          "label" : "B Label" , 
+          "value" : 50
+        } , 
+        { 
+          "label" : "C Label" , 
+          "value" : 32
+        } , 
+        { 
+          "label" : "D Label" , 
+          "value" : 196
+        } , 
+        { 
+          "label" : "E Label" ,
+          "value" : 5
+        } , 
+        { 
+          "label" : "F Label" , 
+          "value" : 98
+        } , 
+        { 
+          "label" : "G Label" , 
+          "value" : 13
+        } , 
+        { 
+          "label" : "H Label" , 
+          "value" :5
+        }
+      ]
+    }
+  ]
+
+}
+    var chart;
+    nv.addGraph(function() {
+				var chart = nv.models.discreteBarChart()
+					.x(function(d) { return d.label })
+					.y(function (d) { return d.value })
+					.margin({top: 10, right: -10, bottom: -50, left: 20})
+					.options({height:75})//, width:400,})
+					.color(['#E64C00']);
+					
+				chart.yAxis.tickFormat(d3.format('.0f'));
+				chart.xAxis.tickFormat(function(d){
+				    if (typeof this != 'undefined') {
+					 var el = d3.select(this);
+					 var p = d3.select(this.parentNode);
+					 p.append("foreignObject")
+						.attr('x', -25)
+						.attr("width", 50)
+						.attr("height", 200)
+						.append("xhtml:p")
+						.attr('style','word-wrap: break-word; text-align:center; font: normal 8px sans-serif;')
+						.html(d);    
+
+					    el.remove();
+					    return d;
+				    }
+				});
+
+				d3.select('#chart1')
+						.datum(exampleData())
+						.attr("id", function (d) { console.log(d); })
+						.transition().duration(500)
+						.call(chart);
+
+				nv.utils.windowResize(chart.update);
+				return chart;
+    });
+</script>
+</body>
+</html>

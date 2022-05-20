@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NYC Construction Dashboard</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="https://nycdob.github.io/DOB_Dashboards/assets/css/keen-dashboards.css" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+</head>
+
+<style>
+	.navbar-brand-heading {
+		font-size: 28px;
+		font-weight: bold;
+		color: white;
+		margin-top: 4px;
+		
+	}
+	div.navbar-collapse ul.navbar-nav li.c2 a {
+		color: #8A8A8A;
+	}
+		div.navbar-collapse ul.navbar-nav li.c2 a:hover{
+		color: white;
+	}
+	div.navbar-collapse ul.navbar-nav li.c3 a {
+		color: #8A8A8A;
+	}
+	.chart-waffle {
+		width: 100%;
+		height: 220px;
+		padding: 0;
+		overflow-y: hidden;
+		overflow-x: auto;
+	}
+	<!-- .chart-permits-city { -->
+		<!-- width: 100%; -->
+		<!-- height: 220px; -->
+		<!-- padding: 8px; -->
+		<!-- position: relative; -->
+		<!-- overflow: hidden; -->
+		<!-- overflow-y: auto; -->
+		<!-- overflow-x: auto; -->
+	<!-- } -->
+	.chart-map {
+		width: 100%;
+		height: 640px;
+		padding: 5px 25px 5px;
+		overflow-y: hidden;
+		overflow-x: auto;
+		<!-- border-left: 3px solid #e2e2e2; -->
+		<!-- border-right: 3px solid #e2e2e2; -->
+		<!-- border-top: 3px solid #e2e2e2; -->
+		<!-- border-bottom: 3px solid #e2e2e2; -->
+		position: relative;
+	}
+	.dev-table {
+		width: 100%;
+		height: 500px;
+		padding: 0;
+		overflow-y: auto;
+		overflow-x: auto;
+	}
+	#sub_nav {
+		background-color: rgba(222,115,0,.6);
+		border-color: rgb(222,115,0);
+	}
+	#sub_nav .navbar-brand {
+		color: black;
+	}
+	#constr .navbar-brand a:hover {
+		color: #8A8A8A;
+	}
+	
+</style>
+
+
+<body class="application">
+  <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+	  <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-left">
+		      <li><a id="constr" class="navbar-brand" style="font-size:26px"><b>NYC Construction Dashboard</b></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  
+
+<div class="container-fluid">
+  <div id="sub_nav" class="navbar navbar-inverse" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-brand">
+		2021
+      </div>
+    </div>
+</div>
+	
+	<div class="row">
+		<div class="col-sm-6 col-md-4">
+			<div class="chart-wrapper">
+			  <div class="chart-title">
+				Job Type: Top 10 Community Districts (2021)
+			  </div>
+			  <div class="chart-stage">
+					<iframe width="100%" height="350px" frameborder="0" scrolling="no" src="nvd3/data/Permits_CD_Top10_2021.html"></iframe>
+			  </div>
+			  <div class="chart-notes">
+				The greatest number of New Building permits were issued in CD503 in Staten Island, while the most Demolition permits were issued in CD407 in Queens. CD301 in Brooklyn had the most A1 permits. The borough of Manhattan had the greatest number of A2 and A3 permits issued overall.
+
+			  </div>
+			</div>
+		</div>
+		<div class="col-sm-6 col-md-4">
+			<div class="chart-wrapper">
+				  <div class="chart-title">
+					Permits Time Series (2000 - 2021)
+				  </div>
+				  <div class="chart-stage">
+						<iframe width="100%" height="350px" frameborder="0" scrolling="no" src="nvd3/data/PermitsTS_2000_2021.html"></iframe>
+				  </div>
+				  <div class="chart-notes">
+					The greatest year-to-year increase in total number of permits issued occurred from 2003 to 2004 where New Building permits increased by 20% and Demolitions increased by 27%. This upward surge continued through 2005, but was followed by a six year period of decline. However, since 2013, New Building and Demolition permits have again steadily increased. Since 2018 New Building permits have been on the decline while Demolition permits increased by 1% in 2019 from the previous year. In 2021 New Building permits increased by 11% and Demolition permits increased by 10% from 2020. This chart shows all permits issued by the Department, that remained valid at the end of the quarter &#8211; Status: Permit Issued or Permit Entire.
+
+				  </div>
+			</div>
+		</div>  
+		<div class="col-sm-6 col-md-4">
+			<div class="chart-wrapper">
+			  <div class="chart-title">
+				Active NB & A1 (2000 - 2021) <a href="nvd3/data/TotalSQFT_NB_A1_2000_2021_NEW_METHOD.html" target="NBA1"><font color="#02c7ea">Square Feet</font></a> |
+						<a href="nvd3/data/ProposedDwellingUnits_NB_A1_2000_2021_NEW_METHOD.html" target="NBA1"><font color="#02c7ea">Proposed Dwelling Units</font></a>
+			  </div>
+			  <div class="chart-stage">
+					<iframe width="100%" height="350px" frameborder="0" scrolling="no" id="show" name="NBA1"></iframe>	
+			  </div>
+			  <div class="chart-notes">
+				In 2009 there was a 12% reduction in New Building square footage from the previous year. The 2008 economic crisis can be attributed toward this decline in New Building construction. In 2015 there was a 44% increase in New Building square footage from the previous year. This spike can be attributed to the 2015 expiration of a tax benefit (421-a) for new construction. The effects of the Coronavirus pandemic in 2020 saw overall decreases in NB/A1 square footage and proposed dwelling units. There was an increase of 3% of New Building square footage and less than 1% increase in Alt1 square footage in 2021 from the previous year. There was a 3% increase in New Building proposed dwelling units and an 18% increase in Alt1 proposed dwelling units from the previous year.
+
+			  </div>
+			</div>
+		</div>
+	</div>
+	
+	
+	 <div class="row">
+      <div class="col-sm-6">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            Permit Types by Community District (2021)
+          </div>
+          <div class="chart-map">
+            
+				<iframe width="800px" height="645px" frameborder="0" scrolling="no" src="PermitsMap/PermitsMap_2021.html" onload="this.style.height=this.contentDocument.body.scrollHeight + 'px';"></iframe>
+					
+            
+          </div>
+
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="chart-wrapper">
+		<div class="chart-title">
+            2021 Construction Permit Activity
+        </div> 
+		  <div class="chart-permits" style="overflow-y:auto; padding:7px; height:640px";>
+			<font size="3">While there was a decline in construction activity in 2021 due to the Coronavirus pandemic, the overall trends remain similar to past years. The majority of New Building (NB) and Demolition (DM) permits were issued in Brooklyn and Queens. However, smaller job types such as Alteration Types 2 (ALT2) and 3 (ALT3) were more prevalent in Manhattan. The permitting data presented in this report are aggregated by both initial and renewed permits.</font><p><br/>  
+            <ul>
+				<li><b><font size="3">New Building (NB): </b><i>Queens</i> had the most NB permits issued in 2021 (2,326 total, 32% citywide). The Community District with the greatest number of NB permits issued in 2021 was CD503 in Staten Island (563 total, 8% citywide).</font><p></li><br/>
+				<li><b><font size="3">ALT1: </b><i>Brooklyn</i> had the greatest number of ALT1 permits issued in 2021 (2,940 total, 37% citywide). CD301 in Brooklyn had 343 ALT1 permits issued in 2021, 4% of the citywide total.</font><p></li><br/>
+				<li><b><font size="3">ALT2: </b><i>Manhattan</i> had the greatest number of ALT2 permits in 2021 (48,172 total, 42% citywide). The Community District with the most ALT2 permits in 2021 was CD105 in Manhattan (10,669 total, 10% citywide).</font><p></li><br/>
+				<li><b><font size="3">ALT3: </b><i>Manhattan</i> had the greatest number of ALT3 permits in 2021 (1,531 total, 44% citywide). The Community District with the greatest number of initial and renewal ALT3 permits in 2021 was CD105 in Manhattan (368 total, 11% citywide).</font><p></li><br/>
+				<li><b><font size="3">Demolition (DM): </b><i>Brooklyn</i> had the greatest number of DM permits in 2021 (536 total, 34% citywide). The Community District with the greatest number permits issued in 2021 was CD407 in Queens (95 total, 6% citywide).</font><p></li><br/>
+				<li><b><font size="3">Total Permits: </b><i>Manhattan</i> had the greatest total number of permits issued in 2021 (52,107 total, 37% citywide). The Community District with the greatest number of permits issued in 2021 was CD105 in Manhattan (11,375 total, 8% citywide).</font><p></li><br/>
+			</ul>
+		  </div>
+        </div>
+      </div>
+    </div>
+
+	
+	<div class="row">
+		<div class="col-sm-6 col-md-6">
+			<div class="chart-wrapper">
+				  <div class="chart-title">
+					Demolition Permits Density Time Series (2000 - 2021)
+				  </div>
+					<div class="chart-stage">
+						<iframe width="100%" height="815" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="DemolitionPermitsDensity2021" src="DensityMaps/DM_2021.html"></iframe>
+					</div>			
+					<div class="chart-notes">
+						This map shows concentrations of demolition permits between 2000-2021 (press play or click and drag time slider to iterate over years). Darker shades of red indicate higher concentrations of demolition permits while darker shades of green indicate lower concentrations.   
+
+					</div>
+			</div>
+		</div>	
+		<div class="col-sm-6 col-md-6">
+			<div class="chart-wrapper">
+				  <div class="chart-title">
+					New Building Permits Density Time Series (2000 - 2021)
+				  </div>
+					<div class="chart-stage">
+						<!-- <style>.embed-container {position: relative; padding-bottom: 80%; height: 0; max-width: 100%;} .embed-container iframe, .embed-container object, .embed-container iframe{position: absolute; top: 0; left: 0; width: 100%; height: 100%;} small{position: absolute; z-index: 40; bottom: 0; margin-bottom: -15px;}</style><div class="embed-container"><iframe width="100%" height="400" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="DemolitionPermitsDensity2016" src="https://nycdob.maps.arcgis.com/apps/Embed/index.html?webmap=1c25bbc82b8c469789700f6fe7ea3535&amp;extent=-74.4407,40.4766,-73.4265,40.9264&amp;zoom=true&amp;scale=true&amp;disable_scroll=true&amp;theme=light"></iframe></div> -->
+						<iframe width="100%" height="825" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="NewBuildingPermitsDensity2021" src="DensityMaps/NB_2021.html"></iframe>
+					</div>			
+					<div class="chart-notes">
+						This map shows concentrations of new building permits between 2000-2021 (press play or click and drag time slider to iterate over years). Darker shades of red indicate higher concentrations of new building permits while darker shades of blue indicate lower concentrations.
+
+					</div>
+			</div>
+		</div>
+	</div>
+
+	
+	<div class="row">
+		<div class="col-sm-6 col-md-6">
+			<div class="chart-wrapper">
+			  <div class="chart-title">
+				NYC Employment: Construction of Buildings (2000 - 2021)
+			  </div>
+				<div class="chart-stage">	
+					<iframe width="100%" height="500" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="NYC Employment: Construction of Buildings (2000 - 2021)" src="nvd3/data/ConstructionEmployment_Permits_2000_2021.html"></iframe>
+				</div>			
+				<div class="chart-notes">
+					Employment in the industry of building construction has steadily increased in New York City between 2010 and 2019 with a 59% increase in 2019 since 2010. 2020 showed it's first decline in building construction employment since 2010 with a 14% decrease from the previous year. In 2021 building construction employment decreased by 2% from the previous year. Between 2018 and 2020 there was a decline in permit activity, however in 2021 there was a slight increase of 3%. There is a strong correlation between construction employment numbers and permitting activity.<p>
+					<i>Source: US Department of Labor</i>
+
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-6 col-md-6">
+			<div class="chart-wrapper">
+				<div class="chart-title">
+					Top 20 Development Projects (2021)
+				</div>
+					<div class="chart-stage">
+						<iframe width="100%" height="500" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="Top 20 Development Projects" src="Top20DevProjects/index_2021.html"></iframe>
+						<div class="chart-notes">
+							This map shows the top 20 approved New Building and Alteration permits issued with the highest estimated cost in 2021. 270 Park Avenue in Manhattan had the greatest estimated cost of 369 million in 2021.  Construction costs are self-reported by the applicant.
+						</div>		
+					</div>
+			</div>
+		</div>
+	</div>
+		
+	
+	<div class="row">
+		<div class="col-sm-6 col-md-6">
+			<div class="chart-wrapper">
+				<div class="chart-title">
+					Job Type per Borough (2000 - 2021)
+				</div>
+				<div class="chart-stage">					
+					<iframe width="100%" height="500px" frameborder="0" scrolling="no" src="nvd3/data/PermitsIssuedRenewedByJobTypeBoros_2000_2021.html"></iframe>			
+					<div class="chart-notes">
+						Since 2000, Queens and Brooklyn have seen the largest proportion of New Building, ALT1, and Demolition permits issued, whereas the most A2 and A3 permits have been issued in Manhattan. There are more A2 permits issued in Manhattan than the other four boroughs combined. 
+					</div>
+				</div>
+			</div>		
+		</div>
+		<div class="col-sm-6 col-md-6">
+			<div class="chart-wrapper">
+				<div class="chart-title">
+					NB Total Square Footage & Dwelling Units (2020 - 2021)
+				</div>
+				<div class="chart-stage">					
+					<iframe width="100%" height="500px" frameborder="0" scrolling="no" src="NB_SqFt_PropDwellUnits/index_2020_2021.html"></iframe>			
+					<div class="chart-notes">
+						This map shows initial new building permits issued in 2020 and 2021, with the larger/darker circles indicating higher total volume of square footage and dwelling units. Over the two-year period, Queens had the highest number of initial NB permits issued. Manhattan had 89% fewer NB permits issued than Queens. Brooklyn had both the greatest amount of square footage and the greatest amount of dwelling units over the two-year period. 
+					</div>
+				</div>
+			</div>		
+		</div>
+	</div>		
+</div>
+</body>
+</html>
+<!-- <hr>
+
+    <p class="small text-muted">Built by DOB Analytics</a></p> -->
+
+
+  
+
+
+  <!-- <script type="text/javascript" src="../../assets/lib/jquery/dist/jquery.min.js"></script> -->
+	<script type="text/javascript" src="https://nycdob.github.io/DOB_Dashboards/assets/lib/jquery/dist/jquery.min.js"></script>
+  <!-- <script type="text/javascript" src="../../assets/lib/bootstrap/dist/js/bootstrap.min.js"></script> -->
+	<script type="text/javascript" src="https://nycdob.github.io/DOB_Dashboards/assets/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+  <!-- <script type="text/javascript" src="../../assets/lib/holderjs/holder.js"></script> -->
+	<script type="text/javascript" src="https://nycdob.github.io/DOB_Dashboards/assets/lib/holderjs/holder.js"></script>
+  <script>
+    Holder.add_theme("white", { background:"#fff", foreground:"#a7a7a7", size:10 });
+  </script>
+
+  <!-- <script type="text/javascript" src="../../assets/lib/keen-js/dist/keen.min.js"></script> -->
+	<script type="text/javascript" src="https://nycdob.github.io/DOB_Dashboards/assets/lib/keen-js/dist/keen.min.js"></script>
+  <!-- <script type="text/javascript" src="../../assets/js/meta.js"></script> -->
+	<script type="text/javascript" src="https://nycdob.github.io/DOB_Dashboards/assets/js/meta.js"></script>
+<script>
+var today = new Date();
+	var dd = today.getDate();
+	var mm = today.getMonth()+1;
+	var yyyy = today.getFullYear();
+	today = mm + '/' + dd + '/' + yyyy;
+	d3.select("#today").html(today);
+	
+	
+        $('body').ready(function() {
+            // preload iframe with message
+            var iframe = document.getElementById('show').src = 'https://nycdob.github.io/NVD3_DOB/examples/TotalSQFT_NB_A1_2000_2021_NEW_METHOD';
+            var iframedoc = iframe.contentDocument || iframe.contentWindow.document;
+			<!-- iframedoc.body.innerHTML; -->
+            <!-- iframedoc.body.innerHTML = ''; -->
+                <!-- + '<br><br>' -->
+                <!-- + '<div style="text-align: center; color: #666666; font-family: Lato; font-size: 15px; font-weight:bold;">' -->
+                <!-- + 'Click the links above to load the metric here' -->
+                <!-- + '</div>'; -->
+			
+		
+            $('.showbases').click(function(evt){
+                evt.preventDefault();
+                evt.stopPropagation();
+                $(evt.target).fadeOut();
+                $('.chartlinks').stop().slideUp({complete: function() {
+                    $('.showcharts').fadeIn();
+                    $('.baselinks').slideDown();
+                }});
+            });
+            $('.showcharts').click(function(evt){
+                evt.preventDefault();
+                evt.stopPropagation();
+                $(evt.target).fadeOut();
+                $('.baselinks').stop().slideUp({complete: function() {
+                    $('.showbases').fadeIn();
+                    $('.chartlinks').slideDown();
+                }});
+            });
+            $('.examplelinks a').each(function(i, elem) {
+                $(elem).click(function(evt) {
+                    $('#show').prop('src', $(evt.target).prop('href'));
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                    $('.examplelinks a').removeClass('selected');
+                    $(evt.target).addClass('selected');
+                    // add link to source
+                    var urlparts = $(evt.target).prop('href').split('/');
+                    var file = urlparts[urlparts.length - 1];
+                    var sourceurl = 'https://github.com/nvd3-community/nvd3/blob/gh-pages/examples/' + file;
+                    $('#tosource').prop('href', sourceurl).fadeIn();
+                    // also set link to view only the example
+                    $('#showonlythis').prop('href', $(evt.target).prop('href'));
+                    // done
+                    $('#example_options').attr('style', '');
+                    return false;
+                });
+            });
+        });
+	
+	
+	
+var client = new Keen({
+  projectId: "5368fa5436bf5a5623000000",
+  readKey: "3f324dcb5636316d6865ab0ebbbbc725224c7f8f3e8899c7733439965d6d4a2c7f13bf7765458790bd50ec76b4361687f51cf626314585dc246bb51aeb455c0a1dd6ce77a993d9c953c5fc554d1d3530ca5d17bdc6d1333ef3d8146a990c79435bb2c7d936f259a22647a75407921056"
+});
+Keen.ready(function(){
+  // ----------------------------------------
+  // Sample one
+  // ----------------------------------------
+  var pageviews_timeline = new Keen.Query("count", {
+    eventCollection: "pageviews",
+    interval: "hourly",
+    groupBy: "user.device_info.browser.family",
+    timeframe: {
+      start: "2014-05-04T00:00:00.000Z",
+      end: "2014-05-05T00:00:00.000Z"
+    }
+  });
+  client.draw(pageviews_timeline, document.getElementById("chart-01"), {
+    chartType: "areachart",
+    title: false,
+    height: 250,
+    width: "auto",
+    chartOptions: {
+      chartArea: {
+        height: "85%",
+        left: "5%",
+        top: "5%",
+        width: "80%"
+      },
+      isStacked: true
+    }
+  });
+  // ----------------------------------------
+  //  End sample one
+  // ----------------------------------------
+  // ----------------------------------------
+  // Sample two
+  // ----------------------------------------
+  var pageviews_static = new Keen.Query("count", {
+    eventCollection: "pageviews",
+    groupBy: "user.device_info.browser.family",
+    timeframe: {
+      start: "2014-05-01T00:00:00.000Z",
+      end: "2014-05-05T00:00:00.000Z"
+    }
+  });
+  client.draw(pageviews_static, document.getElementById("chart-02"), {
+    chartType: "piechart",
+    title: false,
+    height: 250,
+    width: "auto",
+    chartOptions: {
+      chartArea: {
+        height: "85%",
+        left: "5%",
+        top: "5%",
+        width: "100%"
+      },
+      pieHole: .4
+    }
+  });
+  // ----------------------------------------
+  // End sample two
+  // ----------------------------------------
+  // ----------------------------------------
+  // Sample three
+  // ----------------------------------------
+  var impressions_timeline = new Keen.Query("count", {
+    eventCollection: "impressions",
+    groupBy: "ad.advertiser",
+    interval: "hourly",
+    timeframe: {
+      start: "2014-05-04T00:00:00.000Z",
+      end: "2014-05-05T00:00:00.000Z"
+    }
+  });
+  client.draw(impressions_timeline, document.getElementById("chart-03"), {
+    chartType: "columnchart",
+    title: false,
+    height: 250,
+    width: "auto",
+    chartOptions: {
+      chartArea: {
+        height: "75%",
+        left: "10%",
+        top: "5%",
+        width: "60%"
+      },
+      bar: {
+        groupWidth: "85%"
+      },
+      isStacked: true
+    }
+  });
+  // ----------------------------------------
+  // End sample three
+  // ----------------------------------------
+  // ----------------------------------------
+  // Sample four
+  // ----------------------------------------
+  var impressions_timeline_by_device = new Keen.Query("count", {
+    eventCollection: "impressions",
+    groupBy: "user.device_info.device.family",
+    interval: "hourly",
+    timeframe: {
+      start: "2014-05-04T00:00:00.000Z",
+      end: "2014-05-05T00:00:00.000Z"
+    }
+  });
+  client.draw(impressions_timeline_by_device, document.getElementById("chart-04"), {
+    chartType: "columnchart",
+    title: false,
+    height: 250,
+    width: "auto",
+    chartOptions: {
+      chartArea: {
+        height: "75%",
+        left: "10%",
+        top: "5%",
+        width: "60%"
+      },
+      bar: {
+        groupWidth: "85%"
+      },
+      isStacked: true
+    }
+  });
+  // ----------------------------------------
+  // End sample four
+  // ----------------------------------------
+  // ----------------------------------------
+  // Sample five
+  // ----------------------------------------
+  var impressions_timeline_by_country = new Keen.Query("count", {
+    eventCollection: "impressions",
+    groupBy: "user.geo_info.country",
+    interval: "hourly",
+    timeframe: {
+      start: "2014-05-04T00:00:00.000Z",
+      end: "2014-05-05T00:00:00.000Z"
+    }
+  });
+  client.draw(impressions_timeline_by_country, document.getElementById("chart-05"), {
+    chartType: "columnchart",
+    title: false,
+    height: 250,
+    width: "auto",
+    chartOptions: {
+      chartArea: {
+        height: "75%",
+        left: "10%",
+        top: "5%",
+        width: "60%"
+      },
+      bar: {
+        groupWidth: "85%"
+      },
+      isStacked: true
+    }
+  });
+  // ----------------------------------------
+  // End sample five
+  // ----------------------------------------
+  var impressions_timeline_by_country = new Keen.Query("count", {
+    eventCollection: "impressions",
+    groupBy: "user.geo_info.country",
+    interval: "hourly",
+    timeframe: {
+      start: "2014-05-04T00:00:00.000Z",
+      end: "2014-05-05T00:00:00.000Z"
+    }
+  });
+  client.draw(impressions_timeline_by_country, document.getElementById("chart-06"), {
+    chartType: "columnchart",
+    title: false,
+    height: 250,
+    width: "auto",
+    chartOptions: {
+      chartArea: {
+        height: "75%",
+        left: "10%",
+        top: "5%",
+        width: "60%"
+      },
+      bar: {
+        groupWidth: "85%"
+      },
+      isStacked: true
+    }
+  });
+});
+</script>
